@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="libs">
+    <CLASSES>
+      <root url="jar://C:/MinecraftLibs/Heroes.jar!/" />
+      <root url="jar://C:/MinecraftLibs/spigot_181.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://C:/MinecraftLibs/spigot_181.jar!/" />
+    </SOURCES>
+  </library>
+</component>
