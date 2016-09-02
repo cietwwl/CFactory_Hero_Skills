@@ -8,6 +8,7 @@ import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillType;
 import com.herocraftonline.heroes.util.Messaging;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
+import com.palmergames.bukkit.towny.object.TownyUniverse;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -93,12 +94,19 @@ public class SkillFirespin extends ActiveSkill {
         final Player player = hero.getPlayer();
         final Block wTarget = player.getTargetBlock((Set<Material>) null, (SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE, 15, false) +
                 (SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE_INCREASE.node(), 0, false) * hero.getSkillLevel(this))));
+
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             if (p.getWorld().equals(wTarget.getWorld()) && Math.sqrt(p.getLocation().distanceSquared(wTarget.getLocation())) <= 2 && !p.equals(player)
                     && !damageCheck(p, player)) {
                 return SkillResult.INVALID_TARGET;
             }
         }
+
+        // Если городская территория И запрещено PVP, ТО запрещаем использование умения
+        if (!TownyUniverse.isWilderness(wTarget) && !TownyUniverse.getTownBlock(wTarget.getLocation()).getPermissions().pvp) {
+            return SkillResult.NO_COMBAT;
+        }
+
         final long duration = (long) (Math.rint(Math.random() * 5) * 20 + 100);
         broadcastExecuteText(hero);
         Messaging.send(player, "Duration: " + duration / 20 + "s");
@@ -188,11 +196,11 @@ public class SkillFirespin extends ActiveSkill {
     }
 
     private boolean setBlock(Player player, Block block) {
-        BlockBreakEvent testEvent = new BlockBreakEvent(block, player);
+        /*BlockBreakEvent testEvent = new BlockBreakEvent(block, player);
         Bukkit.getPluginManager().callEvent(testEvent);
         if (testEvent.isCancelled()) {
             return false;
-        }
+        }*/
         block.setType(Material.FIRE);
         return true;
     }

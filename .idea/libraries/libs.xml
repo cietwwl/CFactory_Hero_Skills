@@ -3,6 +3,7 @@
     <CLASSES>
       <root url="jar://C:/MinecraftLibs/Heroes.jar!/" />
       <root url="jar://C:/MinecraftLibs/spigot_181.jar!/" />
+      <root url="jar://C:/MinecraftLibs/Towny.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
