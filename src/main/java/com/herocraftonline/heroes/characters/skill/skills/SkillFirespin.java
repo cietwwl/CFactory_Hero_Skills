@@ -8,15 +8,14 @@ import com.herocraftonline.heroes.characters.skill.SkillConfigManager;
 import com.herocraftonline.heroes.characters.skill.SkillType;
 import com.herocraftonline.heroes.util.Messaging;
 import com.herocraftonline.heroes.characters.skill.SkillSetting;
-import com.palmergames.bukkit.towny.object.TownyUniverse;
-import org.bukkit.Bukkit;
+
+import me.kapehh.main.pluginmanager.utils.LocationUtil;
 import org.bukkit.entity.Player;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.event.block.BlockBreakEvent;
 
 import java.util.Set;
 
@@ -95,6 +94,8 @@ public class SkillFirespin extends ActiveSkill {
         final Block wTarget = player.getTargetBlock((Set<Material>) null, (SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE, 15, false) +
                 (SkillConfigManager.getUseSetting(hero, this, SkillSetting.MAX_DISTANCE_INCREASE.node(), 0, false) * hero.getSkillLevel(this))));
 
+        if (wTarget == null) return SkillResult.INVALID_TARGET;
+
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             if (p.getWorld().equals(wTarget.getWorld()) && Math.sqrt(p.getLocation().distanceSquared(wTarget.getLocation())) <= 2 && !p.equals(player)
                     && !damageCheck(p, player)) {
@@ -102,10 +103,12 @@ public class SkillFirespin extends ActiveSkill {
             }
         }
 
-        // Если городская территория И запрещено PVP, ТО запрещаем использование умения
-        if (!TownyUniverse.isWilderness(wTarget) && !TownyUniverse.getTownBlock(wTarget.getLocation()).getPermissions().pvp) {
-            return SkillResult.NO_COMBAT;
+        // Если запрещено пвп, то не даем пвп
+        if (!LocationUtil.isLocationPVP(wTarget.getLocation())) {
+            Messaging.send(player, "This territory is NoPVP!");
+            return SkillResult.CANCELLED;
         }
+        // END
 
         final long duration = (long) (Math.rint(Math.random() * 5) * 20 + 100);
         broadcastExecuteText(hero);

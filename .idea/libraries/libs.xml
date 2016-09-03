@@ -4,6 +4,9 @@
       <root url="jar://C:/MinecraftLibs/Heroes.jar!/" />
       <root url="jar://C:/MinecraftLibs/spigot_181.jar!/" />
       <root url="jar://C:/MinecraftLibs/Towny.jar!/" />
+      <root url="jar://C:/MinecraftLibs/worldguard-6.1.jar!/" />
+      <root url="jar://C:/MinecraftLibs/worldedit-bukkit-6.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../PluginManager/out/artifacts/PluginManager/PluginManager.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES>
