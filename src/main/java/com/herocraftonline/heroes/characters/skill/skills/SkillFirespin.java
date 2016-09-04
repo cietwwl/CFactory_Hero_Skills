@@ -96,19 +96,18 @@ public class SkillFirespin extends ActiveSkill {
 
         if (wTarget == null) return SkillResult.INVALID_TARGET;
 
+        // Если запрещено пвп, то не даем использование
+        if (!LocationUtil.isLocationPVP(wTarget.getLocation())) {
+            Messaging.send(player, "This territory is NoPVP!");
+            return SkillResult.CANCELLED;
+        }
+
         for (Player p : plugin.getServer().getOnlinePlayers()) {
             if (p.getWorld().equals(wTarget.getWorld()) && Math.sqrt(p.getLocation().distanceSquared(wTarget.getLocation())) <= 2 && !p.equals(player)
                     && !damageCheck(p, player)) {
                 return SkillResult.INVALID_TARGET;
             }
         }
-
-        // Если запрещено пвп, то не даем пвп
-        if (!LocationUtil.isLocationPVP(wTarget.getLocation())) {
-            Messaging.send(player, "This territory is NoPVP!");
-            return SkillResult.CANCELLED;
-        }
-        // END
 
         final long duration = (long) (Math.rint(Math.random() * 5) * 20 + 100);
         broadcastExecuteText(hero);
@@ -168,7 +167,6 @@ public class SkillFirespin extends ActiveSkill {
             needEight = setBlock(player, wTarget.getRelative(BlockFace.SOUTH_EAST).getRelative(BlockFace.UP));
         }
 
-        // CYPA BLYAT
         final boolean f_needOne = needOne;
         final boolean f_needTwo = needTwo;
         final boolean f_needThree = needThree;
