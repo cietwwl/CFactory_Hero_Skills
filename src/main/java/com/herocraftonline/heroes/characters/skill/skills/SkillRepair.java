@@ -15,6 +15,7 @@ import com.herocraftonline.heroes.util.Util;
 import java.util.ArrayList;
 import java.util.Map;
 
+import me.kapehh.main.pluginmanager.utils.PlayerUtil;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
@@ -259,7 +260,8 @@ public class SkillRepair extends ActiveSkill {
             return SkillResult.INVALID_TARGET_NO_MSG;
         }
         ItemStack reagentStack = new ItemStack(reagent, getRepairCost(is));
-        if (!hasReagentCost(player, reagentStack)) {
+        //if (!hasReagentCost(player, reagentStack)) {
+        if (!PlayerUtil.isContainsItem(player.getInventory(), reagentStack)) {
             return new SkillResult(SkillResult.ResultType.MISSING_REAGENT, true, Integer.valueOf(reagentStack.getAmount()), MaterialUtil.getFriendlyName(reagentStack.getType()));
         }
         boolean lost = false;
@@ -274,13 +276,13 @@ public class SkillRepair extends ActiveSkill {
                 lost = true;
             }
         }
-        if (!player.getInventory().contains(reagentStack)) {
-            // TODO
+        /*if (!player.getInventory().contains(reagentStack)) {
             return SkillResult.INVALID_TARGET_NO_MSG;
-        }
-        player.getInventory().removeItem(reagentStack);
+        }*/
+        //player.getInventory().removeItem(reagentStack);
         is.setDurability((short) 0);
         Util.syncInventory(player, this.plugin);
+        PlayerUtil.takeItems(player.getInventory(), reagentStack);
         broadcast(player.getLocation(), this.useText, player.getDisplayName(), is.getType().name().toLowerCase().replace("_", " "), lost ? " and stripped it of enchantments!" : !enchanted ? "." : " and successfully kept the enchantments.");
         return SkillResult.NORMAL;
     }

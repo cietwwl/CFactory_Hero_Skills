@@ -37,27 +37,28 @@ import org.bukkit.inventory.ItemStack;
 
 public class SkillOmegaGrip extends TargettedSkill implements Listener {
     private HashMap<Hero, Hero> grippingPlayers = new HashMap<Hero, Hero>();
+
     public SkillOmegaGrip(Heroes plugin) {
         super(plugin, "OmegaGrip");
         setDescription("Channeling, Stuns for $3s deals $1 + $2 & drains $4hp, $5mana every $6s.");
         setUsage("/skill omegagrip [target]");
         setArgumentRange(0, 1);
         setIdentifiers("skill omegagrip");
-        
+
         setTypes(SkillType.SILENCABLE, SkillType.ILLUSION);
     }
-    
+
     @Override
     public String getDescription(Hero hero) {
         int damage = (SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE.node(), 0, false)
                 - SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_INCREASE.node(), 0, false) * hero.getLevel());
         damage = damage < 0 ? 0 : damage;
-        
-        
+
+
         int damageTick = (SkillConfigManager.getUseSetting(hero, this, SkillSetting.DAMAGE_TICK.node(), 0, false)
                 - SkillConfigManager.getUseSetting(hero, this, "damage-tick-increase", 0, false) * hero.getLevel());
         damageTick = damageTick < 0 ? 0 : damageTick;
-        
+
         int duration = (SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION.node(), 0, false)
                 - SkillConfigManager.getUseSetting(hero, this, SkillSetting.DURATION_INCREASE.node(), 0, false) * hero.getLevel()) / 1000;
         duration = duration < 0 ? 0 : duration;
@@ -67,12 +68,12 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
         int healthTick = (SkillConfigManager.getUseSetting(hero, this, SkillSetting.HEALTH_TICK.node(), 0, false)
                 - SkillConfigManager.getUseSetting(hero, this, "health-tick-increase", 0, false) * hero.getLevel());
         healthTick = healthTick < 0 ? 0 : healthTick;
-        
+
         int manaTick = (SkillConfigManager.getUseSetting(hero, this, "mana-tick", 0, false)
                 - SkillConfigManager.getUseSetting(hero, this, "mana-tick-increase", 0, false) * hero.getLevel());
         manaTick = manaTick < 0 ? 0 : manaTick;
         String description = getDescription().replace("$1", damage + "").replace("$2", damageTick + "").replace("$3", duration + "").replace("$4", healthTick + "").replace("$5", manaTick + "").replace("$6", period + "");
-        
+
         //COOLDOWN
         int cooldown = (SkillConfigManager.getUseSetting(hero, this, SkillSetting.COOLDOWN.node(), 0, false)
                 - SkillConfigManager.getUseSetting(hero, this, SkillSetting.COOLDOWN_REDUCE.node(), 0, false) * hero.getLevel()) / 1000;
@@ -80,43 +81,43 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
         if (cooldown > 0) {
             description += " CD:" + cooldown + "s";
         }
-        
+
         //MANA
         int mana = SkillConfigManager.getUseSetting(hero, this, SkillSetting.MANA.node(), 10, false)
                 - (SkillConfigManager.getUseSetting(hero, this, SkillSetting.MANA_REDUCE.node(), 0, false) * hero.getLevel());
         if (mana > 0) {
             description += " M:" + mana;
         }
-        
+
         //HEALTH_COST
-        int healthCost = SkillConfigManager.getUseSetting(hero, this, SkillSetting.HEALTH_COST, 0, false) - 
+        int healthCost = SkillConfigManager.getUseSetting(hero, this, SkillSetting.HEALTH_COST, 0, false) -
                 (SkillConfigManager.getUseSetting(hero, this, SkillSetting.HEALTH_COST_REDUCE, mana, true) * hero.getLevel());
         if (healthCost > 0) {
             description += " HP:" + healthCost;
         }
-        
+
         //STAMINA
         int staminaCost = SkillConfigManager.getUseSetting(hero, this, SkillSetting.STAMINA.node(), 0, false)
                 - (SkillConfigManager.getUseSetting(hero, this, SkillSetting.STAMINA_REDUCE.node(), 0, false) * hero.getLevel());
         if (staminaCost > 0) {
             description += " FP:" + staminaCost;
         }
-        
+
         //DELAY
         int delay = SkillConfigManager.getUseSetting(hero, this, SkillSetting.DELAY.node(), 0, false) / 1000;
         if (delay > 0) {
             description += " W:" + delay + "s";
         }
-        
+
         //EXP
         int exp = SkillConfigManager.getUseSetting(hero, this, SkillSetting.EXP.node(), 0, false);
         if (exp > 0) {
             description += " XP:" + exp;
         }
-        
+
         return description;
     }
-    
+
     @Override
     public void init() {
         super.init();
@@ -138,7 +139,7 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
         node.set("health-tick-increase", 0);
         node.set("mana-tick", 0);
         node.set("mana-tick-increase", 0);
-        node.set(SkillSetting.MAX_DISTANCE.node(),15);
+        node.set(SkillSetting.MAX_DISTANCE.node(), 15);
         node.set(SkillSetting.MAX_DISTANCE_INCREASE.node(), 0);
         //node.set(Setting.APPLY_TEXT.node(), "%target% was gripped by %player%");
         node.set(SkillSetting.EXPIRE_TEXT.node(), "%player% released %target%");
@@ -151,7 +152,7 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
             try {
                 hero.removeEffect(hero.getEffect("Channel"));
             } catch (NullPointerException npe) {
-                
+
             }
             return SkillResult.INVALID_TARGET_NO_MSG;
         }
@@ -161,7 +162,7 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
         Player player = hero.getPlayer();
         Player tPlayer = (Player) le;
         Hero tHero = plugin.getCharacterManager().getHero(tPlayer);
-        
+
         if (!damageCheck(player, tPlayer)) {
             player.sendMessage(ChatColor.GRAY + "You can't damage that target");
             return SkillResult.INVALID_TARGET_NO_MSG;
@@ -181,24 +182,25 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
         int healthTick = (SkillConfigManager.getUseSetting(hero, this, SkillSetting.HEALTH_TICK.node(), 0, false)
                 - SkillConfigManager.getUseSetting(hero, this, "health-tick-increase", 0, false) * hero.getLevel());
         healthTick = healthTick < 0 ? 0 : healthTick;
-        
+
         int manaTick = (SkillConfigManager.getUseSetting(hero, this, "mana-tick", 0, false)
                 - SkillConfigManager.getUseSetting(hero, this, "mana-tick-increase", 0, false) * hero.getLevel());
         manaTick = manaTick < 0 ? 0 : manaTick;
-        addSpellTarget(tPlayer,hero);
+        addSpellTarget(tPlayer, hero);
         damageEntity(tPlayer, player, damage);
-        
+
         hero.addEffect(new ChannelEffect(this, duration, getReagentCost(hero)));
         tHero.addEffect(new GripEffect(this, duration, period, damageTick, healthTick, manaTick, hero));
-        
+
         broadcastExecuteText(hero, tPlayer);
         grippingPlayers.put(hero, tHero);
         return SkillResult.INVALID_TARGET_NO_MSG;
     }
-    
-    public class ChannelEffect extends PeriodicExpirableEffect  {
+
+    public class ChannelEffect extends PeriodicExpirableEffect {
         private Location loc;
         private final ItemStack reagent;
+
         public ChannelEffect(Skill skill, long duration, ItemStack reagent) {
             super(skill, "Channel", 100, duration);
             this.reagent = reagent;
@@ -210,7 +212,7 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
             super.applyToHero(hero);
             loc = hero.getPlayer().getLocation();
         }
-        
+
         @SuppressWarnings("deprecation")
         @Override
         public void removeFromHero(Hero hero) {
@@ -230,7 +232,7 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
             if (Heroes.properties.globalCooldown > 0) {
                 hero.setCooldown("global", Heroes.properties.globalCooldown + time);
             }
-            
+
             int manaCost = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.MANA, 0, true);
             double manaReduce = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.MANA_REDUCE, 0.0, false) * skillLevel;
             manaCost -= (int) manaReduce;
@@ -243,7 +245,7 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
             int healthCost = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.HEALTH_COST, 0, true);
             double healthReduce = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.HEALTH_COST_REDUCE, 0.0, false) * skillLevel;
             healthCost -= (int) healthReduce;
-            
+
             // Deduct health
             if (healthCost > 0) {
                 player.setHealth(player.getHealth() - healthCost);
@@ -252,7 +254,7 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
             int staminaCost = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.STAMINA, 0, true);
             double stamReduce = SkillConfigManager.getUseSetting(hero, skill, SkillSetting.STAMINA_REDUCE, 0.0, false) * skillLevel;
             staminaCost -= (int) stamReduce;
-            
+
             if (staminaCost > 0) {
                 player.setFoodLevel(player.getFoodLevel() - staminaCost);
             }
@@ -284,9 +286,9 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
                 hero.getPlayer().teleport(loc);
             }
         }
-        
+
     }
-    
+
     public class GripEffect extends PeriodicExpirableEffect {
         private final double damageTick;
         private final double healTick;
@@ -315,7 +317,7 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
             hero.addEffect(new StunEffect(skill, aDuration));
             //broadcast(player.getLocation(), applyText, player.getDisplayName());
         }
-        
+
         @Override
         public void removeFromHero(Hero hero) {
             super.removeFromHero(hero);
@@ -326,17 +328,17 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
             try {
                 hero.removeEffect(hero.getEffect("Stun"));
             } catch (Exception e) {
-                
+
             }
             if (grippingPlayers.containsKey(caster) && caster.hasEffect("Channel")) {
                 caster.removeEffect(caster.getEffect("Channel"));
                 grippingPlayers.remove(caster);
             }
         }
-        
+
         @Override
         public void tickMonster(Monster mnstr) {
-            
+
         }
 
         @Override
@@ -360,7 +362,7 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
             }
         }
     }
-    
+
     @EventHandler
     public void onSkillUse(SkillUseEvent event) {
         if (event.isCancelled() || !event.getHero().hasEffect("Channel")) {
@@ -371,9 +373,9 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
             event.setCancelled(true);
             hero.getPlayer().sendMessage(ChatColor.GRAY + "You can't use that. Use /skill omegagrip");
         }
-        
+
     }
-    
+
     @EventHandler
     public void onEntityDamage(EntityDamageEvent event) {
         if (event.getCause() != DamageCause.ENTITY_ATTACK || !(event instanceof EntityDamageByEntityEvent)) {
@@ -382,7 +384,7 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
         EntityDamageByEntityEvent edbye = (EntityDamageByEntityEvent) event;
         Entity damager = edbye.getDamager();
         if (edbye.getCause() == EntityDamageEvent.DamageCause.PROJECTILE) {
-            damager = (Entity) ((Projectile)damager).getShooter();
+            damager = (Entity) ((Projectile) damager).getShooter();
         }
         if (!(damager instanceof Player)) {
             return;
@@ -392,6 +394,6 @@ public class SkillOmegaGrip extends TargettedSkill implements Listener {
             event.setDamage(0);
         }
     }
-    
+
 
 }
